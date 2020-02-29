@@ -361,7 +361,9 @@ public final class PlayerEnterWorldService {
 				if (pcd.isReadyForGoldenStarEnergy()) {
 					pcd.checkGoldenStarPercent();
 				}
-
+				if (pcd.isReadyForSilverStarEnergy()) {
+					pcd.checkSilverStarPercent();
+				}
 				if (pcd.isReadyForReposteEnergy()) {
 					pcd.updateMaxReposte();
 					// more than 4 hours offline = start counting Reposte Energy addition.
@@ -949,6 +951,9 @@ public final class PlayerEnterWorldService {
 
 			// EnchantService.getGloryShield(player);
 			LunaShopService.getInstance().onLogin(player);
+
+			player.getController().updateZone();
+			player.getController().updateNearbyQuests();
 		}
 		else
 			log.info("[DEBUG] enter world" + objectId + ", Player: " + player);
