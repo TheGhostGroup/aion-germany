@@ -85,6 +85,9 @@ public class ItemEquipmentListener {
 		if (item.getItemTemplate().isStigma()) {
 			StigmaService.recheckHiddenStigma(owner);
 		}
+		if (item.getItemSkinSkill() > 0) {
+			owner.getSkillList().addSkill(owner, item.getItemSkinSkill(), 1);
+		}
 		EnchantService.onItemEquip(owner, item);
 		EnchantService.getGloryShield(owner);
 	}
@@ -131,6 +134,11 @@ public class ItemEquipmentListener {
 		if (item.getItemTemplate().isStigma()) {
 			StigmaService.recheckHiddenStigma(owner);
 		}
+		if (item.getItemSkinSkill() > 0) {
+			if (owner.getSkillList().isSkillPresent(item.getItemSkinSkill())) {
+				SkillLearnService.removeSkill(owner, item.getItemSkinSkill());
+			}
+		}
 		EnchantService.getGloryShield(owner);
 	}
 
@@ -165,7 +173,7 @@ public class ItemEquipmentListener {
 				if (weaponStats != null) {
 					int boostMagicalSkill = Math.round(0.1f * weaponStats.getBoostMagicalSkill());
 					int attack = Math.round(0.1f * weaponStats.getMeanDamage());
-					if (weaponType == WeaponType.ORB_2H || weaponType == WeaponType.BOOK_2H || weaponType == WeaponType.GUN_1H || weaponType == WeaponType.CANNON_2H || weaponType == WeaponType.HARP_2H || weaponType == WeaponType.KEYBLADE_2H) {
+					if (weaponType == WeaponType.ORB_2H || weaponType == WeaponType.BOOK_2H || weaponType == WeaponType.GUN_1H || weaponType == WeaponType.CANNON_2H || weaponType == WeaponType.HARP_2H || weaponType == WeaponType.KEYBLADE_2H || weaponType == WeaponType.SPRAY_2H) {
 						allModifiers.add(new StatAddFunction(StatEnum.MAGICAL_ATTACK, attack, false));
 						allModifiers.add(new StatAddFunction(StatEnum.BOOST_MAGICAL_SKILL, boostMagicalSkill, false));
 					}

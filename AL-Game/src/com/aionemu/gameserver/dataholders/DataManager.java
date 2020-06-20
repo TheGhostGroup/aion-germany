@@ -145,6 +145,10 @@ public final class DataManager {
 	public static ReviveInstanceStartPointsData REVIVE_INSTANCE_START_POINTS;
 	public static ItemEnchantChancesData ITEM_ENCHANT_CHANCES_DATA;
 	public static DynamicPortalData DYNAMIC_PORTAL_DATA;
+	public static LugbugEventData LUGBUG_EVENT_DATA;
+	public static LugbugQuestData LUGBUG_QUEST_DATA;
+	public static LugbugSpecialQuestData LUGBUG_SPECIAL_QUEST_DATA;
+	public static AtreianPassportData ATREIAN_PASSPORT_DATA;
 	private XmlDataLoader loader;
 
 	/**
@@ -275,6 +279,10 @@ public final class DataManager {
 		REVIVE_INSTANCE_START_POINTS = data.reviveInstanceStartPoints;
 		ITEM_ENCHANT_CHANCES_DATA = data.itemEnchantChancesData;
 		DYNAMIC_PORTAL_DATA = data.dynamicPortalData;
+		LUGBUG_EVENT_DATA = data.lugbugEventData;
+		LUGBUG_QUEST_DATA = data.lugbugQuestData;
+		LUGBUG_SPECIAL_QUEST_DATA = data.lugbugSpecialQuestData;
+		ATREIAN_PASSPORT_DATA = data.atreianPassportData;
 		ITEM_DATA.cleanup();
 
 		// some sexy time message

@@ -352,8 +352,8 @@ public class EnchantService {
 		
 		if (result) {
 			currentEnchant += Rnd.get(1, 3);
-			if (currentEnchant > 10) {
-				currentEnchant = 10;
+			if (currentEnchant > 15) {
+				currentEnchant = 15;
 			}
 			finalPlusMessage = currentEnchant - oldEnchant;
 		} else {
@@ -1127,6 +1127,7 @@ public class EnchantService {
 					case SWORD_1H:
 					case SWORD_2H:
 					case KEYHAMMER_2H:
+					case SPRAY_2H:
 						modifiers.add(new StatEnchantFunction(item, StatEnum.PHYSICAL_ATTACK));
 						if (item.getEquipmentSlot() == ItemSlot.MAIN_HAND.getSlotIdMask()) {
 							modifiers.add(new StatEnchantFunction(item, StatEnum.MAIN_HAND_POWER));

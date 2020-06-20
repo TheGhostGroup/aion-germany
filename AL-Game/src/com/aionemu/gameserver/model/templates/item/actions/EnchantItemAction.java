@@ -102,18 +102,33 @@ public class EnchantItemAction extends AbstractItemAction {
 		// Current enchant level
 		final int currentEnchant = targetItem.getEnchantOrAuthorizeLevel();
 		final boolean isSuccess = isSuccess(player, parentItem, targetItem, supplementItem, targetWeapon);
+		int currentEnchantOrAuthorize = 0;
 		switch (targetItem.getItemTemplate().getItemQuality()) {
 			case ANCIENT:
 			case RELIC:
 			case FINALITY:
-				if (currentEnchant == targetItem.getItemTemplate().getMaxAuthorize()) {
+				switch (targetItem.getItemTemplate().getEnchantType()) {
+					case PVP: {
+						currentEnchantOrAuthorize = targetItem.getItemTemplate().getMaxAuthorize();
+						break;
+					}
+					case PVE: {
+						currentEnchantOrAuthorize = targetItem.getItemTemplate().getMaxEnchantLevel();
+						break;
+					}
+					default:
+						break;
+				}
+				if (currentEnchant == currentEnchantOrAuthorize) {
+					System.out.println("Enchant 1");
 					//You cannot enchant %0 any further.
 					PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_ENCHANT_ITEM_IT_CAN_NOT_BE_ENCHANTED_MORE_TIME(targetItem.getNameId()));
 					return;
 				}
 				break;
 			default:
-				if (targetItem.getItemTemplate().getArmorType() != ArmorType.WING && !targetItem.getItemTemplate().getExceedEnchant() && targetItem.getEnchantOrAuthorizeLevel() == 10 && parentItem.getItemTemplate().getTemplateId() / 1000000 == 166 ) {
+				if (targetItem.getItemTemplate().getArmorType() != ArmorType.WING && !targetItem.getItemTemplate().getExceedEnchant() && targetItem.getEnchantOrAuthorizeLevel() == 15 && parentItem.getItemTemplate().getTemplateId() / 1000000 == 166 ) {
+					System.out.println("Enchant 2");
 					// You cannot enchant %0 any further.
 					PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_ENCHANT_ITEM_IT_CAN_NOT_BE_ENCHANTED_MORE_TIME(targetItem.getNameId()));
 					return;

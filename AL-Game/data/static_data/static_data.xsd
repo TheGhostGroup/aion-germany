@@ -111,6 +111,10 @@
 	<xs:include schemaLocation="revive_start_points/instance_revive_start_points.xsd"/>
 	<xs:include schemaLocation="items/enchant_chances.xsd"/>
 	<xs:include schemaLocation="locations/dynamic_portal/dynamic_portal.xsd"/>
+	<xs:include schemaLocation="lugbug/lugbug_events.xsd"/>
+	<xs:include schemaLocation="lugbug/lugbug_quests.xsd"/>
+	<xs:include schemaLocation="lugbug/lugbug_special_quests.xsd"/>
+	<xs:include schemaLocation="events_config/atreian_passports.xsd"/>
     <xs:element name="ae_static_data">
         <xs:complexType>
             <xs:sequence>
@@ -226,6 +230,10 @@
 				<xs:element ref="instance_revive_start_points" minOccurs="0"/>
 				<xs:element ref="enchant_chances" minOccurs="0"/>
 				<xs:element ref="dynamic_portal" minOccurs="0"/>
+				<xs:element ref="lugbug_events" minOccurs="0"/>
+				<xs:element ref="lugbug_quests" minOccurs="0"/>
+				<xs:element ref="lugbug_special_quests" minOccurs="0"/>
+				<xs:element ref="atreian_passports" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

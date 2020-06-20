@@ -240,6 +240,9 @@ public class ItemTemplate extends VisibleObjectTemplate {
     
     @XmlAttribute(name = "enchant_type")
 	private EnchantType enchantType;
+
+	@XmlAttribute(name = "skin_skill")
+	private int skin_skill;
     
 	private static final WeaponStats emptyWeaponStats = new WeaponStats();
 	@XmlTransient
@@ -458,20 +461,12 @@ public class ItemTemplate extends VisibleObjectTemplate {
 		return itemId == ItemId.LUNA.value();
 	}
 
-	public boolean isOldStigma() {
-		return itemId > 140000004 && itemId < 140001103;
-	}
-
 	public boolean isStigma() {
-		return itemId > 140001101 && itemId < 140001493;
+		return itemId > 140001101 && itemId < 140001930;
 	}
 
 	public boolean isInertStigma() {
-		return itemId > 140001297 && itemId < 140001493;
-	}
-
-	public boolean isUpgradableStigma() {
-		return itemId > 140001101 && itemId < 140001298;
+		return name.endsWith("(damaged)");
 	}
 
 	public boolean isPlume() {
@@ -764,5 +759,9 @@ public class ItemTemplate extends VisibleObjectTemplate {
     
     public EnchantType getEnchantType() {
 		return enchantType;
+	}
+
+	public int getSkinSkill() {
+		return skin_skill;
 	}
 }

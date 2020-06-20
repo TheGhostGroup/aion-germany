@@ -24,7 +24,6 @@ import com.aionemu.gameserver.dao.PlayerCubicsDAO;
 import com.aionemu.gameserver.dataholders.DataManager;
 import com.aionemu.gameserver.model.cubics.PlayerMCEntry;
 import com.aionemu.gameserver.model.gameobjects.player.Player;
-import com.aionemu.gameserver.model.items.storage.Storage;
 import com.aionemu.gameserver.model.stats.calc.StatOwner;
 import com.aionemu.gameserver.model.stats.calc.functions.IStatFunction;
 import com.aionemu.gameserver.model.stats.calc.functions.StatAddFunction;
@@ -65,7 +64,7 @@ public class PlayerCubicService implements StatOwner {
 		player.setMonsterCubic(DAOManager.getDAO(PlayerCubicsDAO.class).load(player));
 		maxMonsterCubic = player.getMonsterCubic().getAllMC();
 		
-		PacketSendUtility.sendPacket(player, new SM_CUBIC_INFO(45));
+		PacketSendUtility.sendPacket(player, new SM_CUBIC_INFO(94));
 		
 		for (PlayerMCEntry playerMonsterCubic : maxMonsterCubic) {
 			try {
@@ -78,7 +77,7 @@ public class PlayerCubicService implements StatOwner {
 			level.put(playerMonsterCubic.getCubeId(), playerMonsterCubic.getLevel());
 			statValue.put(playerMonsterCubic.getCubeId(), playerMonsterCubic.getStatValue());
 			
-			for (int cubicId = 1; cubicId <= 45; cubicId++) {
+			for (int cubicId = 1; cubicId <= 94; cubicId++) {
 				if (cubic.containsKey(cubicId)) { // Enviar los cubus obtenidos por el personaje
 					CubicsTemplate monsterCubic = DataManager.CUBICS_DATA.getCubicsId(cubicId);
 					long itemsCubicInBag = player.getInventory().getItemCountByItemId(monsterCubic.getItemIdCubic());
