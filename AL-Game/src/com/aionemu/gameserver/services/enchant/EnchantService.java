@@ -14,7 +14,7 @@
  *  along with Aion-Lightning.
  *  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.aionemu.gameserver.services;
+package com.aionemu.gameserver.services.enchant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +54,8 @@ import com.aionemu.gameserver.model.templates.item.actions.EnchantItemAction;
 import com.aionemu.gameserver.network.aion.serverpackets.SM_INVENTORY_UPDATE_ITEM;
 import com.aionemu.gameserver.network.aion.serverpackets.SM_ITEM_USAGE_ANIMATION;
 import com.aionemu.gameserver.network.aion.serverpackets.SM_SYSTEM_MESSAGE;
+import com.aionemu.gameserver.services.SkillLearnService;
+import com.aionemu.gameserver.services.StigmaService;
 import com.aionemu.gameserver.services.item.ItemPacketService;
 import com.aionemu.gameserver.services.item.ItemService;
 import com.aionemu.gameserver.services.item.ItemSocketService;
@@ -928,7 +930,7 @@ public class EnchantService {
 	 */
 	public static boolean socketManastone(Player player, Item parentItem, Item targetItem, Item supplementItem, int targetWeapon) {
 
-		int targetItemLevel = 1;
+		int targetItemLevel = targetItem.getItemTemplate().getLevel();
 		int stoneLevel = parentItem.getItemTemplate().getLevel();
 		int slotLevel = (int) (10 * Math.ceil((targetItemLevel + 10) / 10d));
 		boolean result = false;
@@ -947,7 +949,7 @@ public class EnchantService {
 		if (targetItem.getItemTemplate().isWeapon()) {
 			switch (targetWeapon) {
 				case 0: { // Fusioned weapon. Primary weapon level.
-					targetItemLevel = targetItem.getFusionedItemTemplate().getLevel();
+//					targetItemLevel = targetItem.getFusionedItemTemplate().getLevel();
 					stoneCount = targetItem.getFusionStones().size(); // Count the inserted stones in the secondary weapon
 					if (!targetItem.hasFusionedItem() || stoneCount > targetItem.getSockets(true)) {
 						AuditLogger.info(player, "Fusion Manastone socket overload [Weapon ItemId]: " + targetItem.getItemTemplate().getTemplateId());
@@ -956,7 +958,7 @@ public class EnchantService {
 					break;
 				}
 				case 1: { // Fusioned weapon. Secondary weapon level.
-					targetItemLevel = targetItem.getItemTemplate().getLevel();
+//					targetItemLevel = targetItem.getItemTemplate().getLevel();
 					stoneCount = targetItem.getItemStones().size(); // Count the inserted stones in the primary weapon
 					if (stoneCount > targetItem.getSockets(false)) {
 						AuditLogger.info(player, "Manastone socket overload [Weapon ItemId]: " + targetItem.getItemTemplate().getTemplateId());
@@ -1066,6 +1068,8 @@ public class EnchantService {
 	}
 
 	public static void socketManastoneAct(Player player, Item parentItem, Item targetItem, int targetWeapon, boolean result) {
+		
+		ManaStone addStone = null;
 
 		// Decrease required supplements
 		player.updateSupplements();
@@ -1074,29 +1078,30 @@ public class EnchantService {
 			if (parentItem.getItemTemplate().getTemplateId() == 166401000) {
 				targetItem.setOptionalSocket(targetItem.getItemTemplate().getOptionSlotBonus());
 			}
+			
 			switch (targetWeapon) {
 				case 0: {
-					ManaStone fusionStone = ItemSocketService.addFusionStone(targetItem, parentItem.getItemTemplate().getTemplateId());
-					ItemEquipmentListener.addStoneStats(targetItem, fusionStone, player.getGameStats());
+					addStone = ItemSocketService.addFusionStone(targetItem, parentItem.getItemTemplate().getTemplateId());
 					break;
 				}
 				case 1: {
-					ManaStone manaStone = ItemSocketService.addManaStone(targetItem, parentItem.getItemTemplate().getTemplateId());
-					ItemEquipmentListener.addStoneStats(targetItem, manaStone, player.getGameStats());
+					addStone = ItemSocketService.addManaStone(targetItem, parentItem.getItemTemplate().getTemplateId());
 					break;
 				}
 				default:
 					break;
 			}
+			
+			if (targetItem.isEquipped()) {
+				ItemEquipmentListener.addStoneStats(targetItem, addStone, player.getGameStats());
+				player.getGameStats().updateStatsAndSpeedVisually();
+			}
+			
+			ItemPacketService.updateItemAfterInfoChange(player, targetItem);
 			PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_GIVE_ITEM_OPTION_SUCCEED(new DescriptionId(targetItem.getNameId())));
 		} else {
 			PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_GIVE_ITEM_OPTION_FAILED(new DescriptionId(targetItem.getNameId())));
 		}
-		
-		if (targetItem.isEquipped()) {
-			player.getGameStats().updateStatsAndSpeedVisually();			
-		}
-		ItemPacketService.updateItemAfterInfoChange(player, targetItem);
 	}
 
 	/**
@@ -1578,4 +1583,38 @@ public class EnchantService {
 
 		ItemPacketService.updateItemAfterInfoChange(player, targetItem);
 	}
+
+    public static void enchantGlyphItemAct(Player player, Item parentItem, Item targetItem, int currentEnchant, boolean result) {
+        int EnchantKinah = EnchantService.EnchantKinah(targetItem);
+        currentEnchant = targetItem.getEnchantOrAuthorizeLevel();
+
+        if (!player.getInventory().decreaseByObjectId(parentItem.getObjectId(), 1)) {
+            return;
+        }
+        if (player.getInventory().getKinah() >= (long)EnchantKinah) {
+            player.getInventory().decreaseKinah(EnchantKinah);
+        }
+        if (player.getInventory().getKinah() < (long)EnchantKinah) {
+            PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_MSG_NOT_ENOUGH_MONEY);
+            return;
+        }
+        currentEnchant = result ? ++currentEnchant : 0;
+        targetItem.setEnchantOrAuthorizeLevel(currentEnchant);
+        if (targetItem.isEquipped()) {
+            player.getGameStats().updateStatsVisually();
+        }
+        ItemPacketService.updateItemAfterInfoChange(player, targetItem, ItemPacketService.ItemUpdateType.STATS_CHANGE);
+        if (targetItem.isEquipped()) {
+            player.getEquipment().setPersistentState(PersistentState.UPDATE_REQUIRED);
+        } 
+        else {
+            player.getInventory().setPersistentState(PersistentState.UPDATE_REQUIRED);
+        }
+        if (result) {
+            PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_MSG_ENCHANT_ITEM_SUCCEED_NEW(new DescriptionId(targetItem.getNameId()), targetItem.getEnchantOrAuthorizeLevel()));
+        } 
+        else {
+            PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_ENCHANT_ITEM_FAILED(new DescriptionId(targetItem.getNameId())));
+        }
+    }
 }

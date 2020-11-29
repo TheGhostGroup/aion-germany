@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-    <xs:include schemaLocation="items/item_templates.xsd"/>
+    <xs:include schemaLocation="items/item/item_templates.xsd"/>
     <xs:include schemaLocation="skills/skills.xsd"/>
     <xs:complexType name="Modifiers">
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
@@ -267,6 +267,26 @@
             <xs:enumeration value="PVP_DEFENSE"/>
             <xs:enumeration value="PVE_ATTACK"/>
             <xs:enumeration value="PVE_DEFENSE"/>
+
+            <xs:enumeration value="OPENAERIAL_ARP"/>
+            <xs:enumeration value="ROOT_ARP"/>
+            <xs:enumeration value="SNARE_ARP"/>
+            <xs:enumeration value="PULLED_ARP"/>
+            <xs:enumeration value="BLIND_ARP"/>
+            <xs:enumeration value="BIND_ARP"/>
+            <xs:enumeration value="SLEEP_ARP"/>
+            <xs:enumeration value="FEAR_ARP"/>
+            
+            <xs:enumeration value="EARTH"/>
+            <xs:enumeration value="WATER"/>
+            <xs:enumeration value="FIRE"/>
+            <xs:enumeration value="AIR"/>
+
+            <xs:enumeration value="MAGICAL_DEFEND"/>
+            
+            <xs:enumeration value="AROPENAERIAL"/>
+            <xs:enumeration value="ARBIND"/>
+            <xs:enumeration value="DEFORM_ARP"/>
         </xs:restriction>
     </xs:simpleType>
 

@@ -27,7 +27,6 @@ import com.aionemu.gameserver.model.TaskId;
 import com.aionemu.gameserver.model.gameobjects.Item;
 import com.aionemu.gameserver.model.gameobjects.PersistentState;
 import com.aionemu.gameserver.model.gameobjects.player.Player;
-import com.aionemu.gameserver.network.aion.serverpackets.SM_INVENTORY_UPDATE_ITEM;
 import com.aionemu.gameserver.network.aion.serverpackets.SM_ITEM_USAGE_ANIMATION;
 import com.aionemu.gameserver.network.aion.serverpackets.SM_SYSTEM_MESSAGE;
 import com.aionemu.gameserver.services.item.ItemPacketService;
@@ -54,48 +53,46 @@ public class ManastoneSlotExpansionAction extends AbstractItemAction {
 	public void act(final Player player, final Item parentItem, final Item targetItem) {
 		final int manaSlot = targetItem.getOptionalSocket();
 		final int manaSlot2 = targetItem.getOptionalFusionSocket();
-		final boolean isSlotSuccess = Rnd.chance((int) 65);
-		final int parentItemId = parentItem.getItemId();
-		final int parentObjectId = parentItem.getObjectId();
-		PacketSendUtility.broadcastPacket(player, new SM_ITEM_USAGE_ANIMATION(player.getObjectId(), parentItem.getObjectId(), parentItemId, 2000, 0, 0), true);
-		final ItemUseObserver moveObserver = new ItemUseObserver() {
+		final boolean isSlotSuccess = Rnd.chance(65);
+		PacketSendUtility.broadcastPacketAndReceive(player, new SM_ITEM_USAGE_ANIMATION(player.getObjectId(), targetItem.getObjectId(), parentItem.getObjectId(), parentItem.getItemId(), 2000, 12));
+
+		final ItemUseObserver observer = new ItemUseObserver() {
 
 			@Override
 			public void abort() {
 				player.getController().cancelTask(TaskId.ITEM_USE);
+				player.removeItemCoolDown(parentItem.getItemTemplate().getUseLimits().getDelayId());
 				player.getObserveController().removeObserver(this);
-				PacketSendUtility.broadcastPacket(player, new SM_ITEM_USAGE_ANIMATION(player.getObjectId(), parentObjectId, parentItemId, 0, 2, 0), true);
-				ItemPacketService.updateItemAfterInfoChange(player, targetItem);
+				PacketSendUtility.broadcastPacketAndReceive(player, new SM_ITEM_USAGE_ANIMATION(player.getObjectId(), targetItem.getObjectId(), parentItem.getObjectId(), parentItem.getItemId(), 0, 14));
 				PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_GIVE_ITEM_OPTIONSLOT_CANCELED(targetItem.getNameId()));
 			}
 		};
-		player.getObserveController().attach(moveObserver);
+		
+		player.getObserveController().attach(observer);
 		player.getController().addTask(TaskId.ITEM_USE, ThreadPoolManager.getInstance().schedule(new Runnable() {
 
 			@Override
 			public void run() {
+				if (!player.getInventory().decreaseByObjectId(parentItem.getObjectId(), targetItem.getItemTemplate().getOptionSlotAddCount())) {
+					return;
+				}
 				if (isSlotSuccess) {
 					if (targetItem.getOptionalSocket() >= targetItem.getItemTemplate().getMaxSlot()) {
 						targetItem.setOptionalFusionSocket(manaSlot2 + 1);
-					} 
-					else {
+					} else {
 						targetItem.setOptionalSocket(manaSlot + 1);
 					}
-					player.getObserveController().removeObserver(moveObserver);
-					player.getInventory().decreaseByObjectId(parentItem.getObjectId(), targetItem.getItemTemplate().getOptionSlotAddCount());
-					PacketSendUtility.broadcastPacket(player, new SM_ITEM_USAGE_ANIMATION(player.getObjectId(), parentObjectId, parentItemId, 0, 1, 0), true);
+					targetItem.setPersistentState(PersistentState.UPDATE_REQUIRED);
 					PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_GIVE_ITEM_OPTIONSLOT_SUCCEED(new DescriptionId(targetItem.getNameId())));
-					targetItem.setPersistentState(PersistentState.UPDATE_REQUIRED);
-					PacketSendUtility.sendPacket(player, new SM_INVENTORY_UPDATE_ITEM(player, targetItem));
-					player.getInventory().setPersistentState(PersistentState.UPDATE_REQUIRED);
-				} 
-				else {
-					player.getObserveController().removeObserver(moveObserver);
+				} else {
+					player.getController().cancelTask(TaskId.ITEM_USE);
+					player.removeItemCoolDown(parentItem.getItemTemplate().getUseLimits().getDelayId());
+					player.getObserveController().removeObserver(observer);
 					PacketSendUtility.sendPacket(player, SM_SYSTEM_MESSAGE.STR_GIVE_ITEM_OPTIONSLOT_FAILED(new DescriptionId(targetItem.getNameId())));
-					targetItem.setPersistentState(PersistentState.UPDATE_REQUIRED);
-					PacketSendUtility.sendPacket(player, new SM_INVENTORY_UPDATE_ITEM(player, targetItem));
 				}
-				PacketSendUtility.broadcastPacketAndReceive(player, new SM_ITEM_USAGE_ANIMATION(player.getObjectId(), parentItem.getObjectId(), parentItem.getItemTemplate().getTemplateId(), 0, isSlotSuccess ? 1 : 2, 0));
+				player.getInventory().setPersistentState(PersistentState.UPDATE_REQUIRED);
+				ItemPacketService.updateItemAfterInfoChange(player, targetItem);
+				PacketSendUtility.broadcastPacketAndReceive(player, new SM_ITEM_USAGE_ANIMATION(player.getObjectId(), targetItem.getObjectId(), parentItem.getObjectId(), parentItem.getItemId(), 0, isSlotSuccess ? 13 : 14));
 			}
 		}, 2000));
 	}

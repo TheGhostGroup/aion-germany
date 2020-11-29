@@ -88,7 +88,7 @@ public class ServerPacketsOpcodes {
 		addPacketOpcode(SM_QUESTION_WINDOW.class, 0x34, idSet);
 		//addPacketOpcode(SM_DUEL_REQUEST_CANCEL.class, 0x35, idSet);
 		addPacketOpcode(SM_ATTACK.class, 0x36, idSet); // 7.5 EU
-		addPacketOpcode(SM_MOVE.class, 0x35, idSet); // 7.5 EU
+		addPacketOpcode(SM_MOVE.class, 0x37, idSet); // 7.5 EU
 		addPacketOpcode(SM_HEADING_UPDATE.class, 0x39, idSet); // TODO! not used
 		addPacketOpcode(SM_TRANSFORM.class, 0x3A, idSet); // 7.5 EU
 		addPacketOpcode(SM_DIALOG_WINDOW.class, 0x3C, idSet);
@@ -354,6 +354,7 @@ public class ServerPacketsOpcodes {
 		//addPacketOpcode(SM_REMOVE_DYE.class, 0x1DF, idSet); // 6.x TODO
 		addPacketOpcode(SM_WORLD_PLAYTIME.class, 0x185, idSet); // 7.5 EU
 		addPacketOpcode(SM_PLAYER_FAME.class, 0x186, idSet); // 7.5 EU
+		addPacketOpcode(SM_RUNES.class, 0x188, idSet); // 7.5 EU TODO
 		
 		// --------------------UNKNOWN PACKETS-----------------------//
 	}
