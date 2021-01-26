@@ -48,6 +48,7 @@ import com.aionemu.gameserver.model.team2.TemporaryPlayerTeam;
 import com.aionemu.gameserver.model.team2.alliance.PlayerAlliance;
 import com.aionemu.gameserver.model.team2.common.service.PlayerTeamDistributionService;
 import com.aionemu.gameserver.model.team2.group.PlayerGroup;
+import com.aionemu.gameserver.model.templates.achievement.AchievementActionType;
 import com.aionemu.gameserver.model.templates.npc.NpcRank;
 import com.aionemu.gameserver.network.aion.serverpackets.SM_ATTACK_STATUS;
 import com.aionemu.gameserver.network.aion.serverpackets.SM_ATTACK_STATUS.LOG;
@@ -58,11 +59,13 @@ import com.aionemu.gameserver.network.aion.serverpackets.SM_SYSTEM_MESSAGE;
 import com.aionemu.gameserver.questEngine.QuestEngine;
 import com.aionemu.gameserver.questEngine.model.QuestEnv;
 import com.aionemu.gameserver.services.DialogService;
+import com.aionemu.gameserver.services.MinionService;
 import com.aionemu.gameserver.services.RespawnService;
 import com.aionemu.gameserver.services.SiegeService;
 import com.aionemu.gameserver.services.abyss.AbyssPointsService;
 import com.aionemu.gameserver.services.drop.DropRegistrationService;
 import com.aionemu.gameserver.services.drop.DropService;
+import com.aionemu.gameserver.services.player.AchievementService;
 import com.aionemu.gameserver.services.player.PlayerFameService;
 import com.aionemu.gameserver.skillengine.model.SkillTemplate;
 import com.aionemu.gameserver.utils.MathUtil;
@@ -299,6 +302,7 @@ public class NpcController extends CreatureController<Npc> {
 					// When a player defeat a "Boss" all ppls on server see!!!
 					defeatNamedMsg(player);
 
+					AchievementService.getInstance().onUpdateAchievementAction(player, getOwner().getObjectTemplate().getTemplateId(), 1, AchievementActionType.HUNT);
 					PlayerFameService.getInstance().addFameExp(player, 10 * getOwner().getLevel() / 2);
 					switch (player.getWorldId()) {
 						case 210050000:
@@ -335,6 +339,10 @@ public class NpcController extends CreatureController<Npc> {
 							PacketSendUtility.sendPacket(player, new SM_STATS_INFO(player));
 						}
 					}
+					if (player.getMinion() == null) {
+						continue;
+					}
+					MinionService.getInstance().onUpdateEnergy(player, 50);
 				}
 			}
 		}
@@ -430,6 +438,7 @@ public class NpcController extends CreatureController<Npc> {
 				if (MathUtil.isIn3dRange(player, getOwner(), GroupConfig.GROUP_MAX_DISTANCE) && !player.getLifeStats().isAlreadyDead()) {
 					int apPlayerReward = Math.round(StatFunctions.calculatePvEApGained(player, getOwner()) * percentage);
 					AbyssPointsService.addAp(player, getOwner(), apPlayerReward);
+					AchievementService.getInstance().onUpdateAchievementAction(player, getOwner().getNpcId(), 1, AchievementActionType.HUNT_SIEGE);
 				}
 			}
 			else if (aggro.getAttacker() instanceof PlayerGroup) {
@@ -446,6 +455,7 @@ public class NpcController extends CreatureController<Npc> {
 						if (apRewardPerMember > 0) {
 							member.getCommonData().addSilverStarEnergy(1500); // 0.15%
 							AbyssPointsService.addAp(member, getOwner(), apRewardPerMember);
+							AchievementService.getInstance().onUpdateAchievementAction(member, getOwner().getNpcId(), 1, AchievementActionType.HUNT_SIEGE);
 						}
 					}
 				}
@@ -465,6 +475,7 @@ public class NpcController extends CreatureController<Npc> {
 						if (apRewardPerMember > 0) {
 							member.getCommonData().addSilverStarEnergy(1500); // 0.15%
 							AbyssPointsService.addAp(member, getOwner(), apRewardPerMember);
+							AchievementService.getInstance().onUpdateAchievementAction(member, getOwner().getNpcId(), 1, AchievementActionType.HUNT_SIEGE);
 						}
 					}
 				}

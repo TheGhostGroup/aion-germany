@@ -297,6 +297,7 @@ public class ServerPacketsOpcodes {
 		addPacketOpcode(SM_LUNA_SYSTEM_INFO.class, 0x149, idSet); // 7.5 EU
 		addPacketOpcode(SM_LUNA_SYSTEM.class, 0x14A, idSet);
 		addPacketOpcode(SM_LUNA_IDENTIFICATION.class, 0x177, idSet); // 7.5 EU
+		addPacketOpcode(SM_LUNA_INSTANCE_BUFF.class, 0x173, idSet); // 7.5 EU
 		// ------------------MAGIC MORPH + CRAFT---------------------//
 		addPacketOpcode(SM_MAGIC_CRAFT_ANIMATION.class, 0x14D, idSet); // 7.5 EU TODO
 		addPacketOpcode(SM_MAGIC_CRAFT.class, 0x14C, idSet); // 7.5 EU TODO
@@ -315,12 +316,24 @@ public class ServerPacketsOpcodes {
 		addPacketOpcode(SM_DAEVANION_SKILL_ENCHANT.class, 0x179, idSet); // 7.5 EU TODO
 		addPacketOpcode(SM_DAEVANION_SKILL_FUSION.class, 0x17A, idSet); // 7.5 EU TODO
 		// ----------------------LUGBUG QUESTS-------------------------//
-		addPacketOpcode(SM_LUGBUG_MISSION.class, 0x17B, idSet); // 7.5 EU
-		addPacketOpcode(SM_LUGBUG_MISSION_COUNT.class, 0x17C, idSet); // 7.5 EU
-		addPacketOpcode(SM_LUGBUG_MISSION_REWARD.class, 0x17D, idSet); // 7.5 EU
-		addPacketOpcode(SM_LUGBUG_EVENT.class, 0x17E, idSet); // 7.5 EU
-		//addPacketOpcode(SM_LUGBUG_EVENTS.class, 0x180, idSet); // 7.5 EU
-		addPacketOpcode(SM_LUGBUG_EVENT_REWARD.class, 0x181, idSet); // 7.5 EU
+		addPacketOpcode(SM_ACHIEVEMENT_LIST.class, 0x17B, idSet); // 7.5 EU
+		addPacketOpcode(SM_ACHIEVEMENT_UPDATE.class, 0x17C, idSet); // 7.5 EU
+		addPacketOpcode(SM_ACHIEVEMENT_COMPLETE.class, 0x17D, idSet); // 7.5 EU
+		addPacketOpcode(SM_ACHIEVEMENT_EVENT_LIST.class, 0x17E, idSet); // 7.5 EU
+		//addPacketOpcode(SM_ACHIEVEMENT_UPDATE_EVENT.class, 0x180, idSet); // 7.5 EU
+		//addPacketOpcode(SM_ACHIEVEMENT_COMPLETE_EVENT.class, 0x181, idSet); // 7.5 EU
+		// ------------------LUMIEL TRANSFORMATION---------------------//
+        addPacketOpcode(SM_LUMIEL_TRANSFORM.class, 0x18A, idSet); // 7.7 EU
+        addPacketOpcode(SM_LUMIEL_TRANSFORM_REWARD_LIST.class, 0x18B, idSet); // 7.7 EU
+        addPacketOpcode(SM_LUMIEL_TRANSFORM_EXP.class, 0x18C, idSet); // 7.7 EU
+        addPacketOpcode(SM_LUMIEL_TRANSFORM_REWARD.class, 0x18D, idSet); // 7.7 EU
+		// --------------------PLAYER COLLECTION-----------------------//
+        addPacketOpcode(SM_PLAYER_COLLECTION.class, 0x18E, idSet); // 7.7 EU
+        addPacketOpcode(SM_PLAYER_COLLECTION_FINISH.class, 0x18F, idSet); // 7.7 EU
+        addPacketOpcode(SM_PLAYER_COLLECTION_UNK.class, 0x190, idSet); // 7.7 EU
+        addPacketOpcode(SM_PLAYER_COLLECTION_PROGRESS.class, 0x191, idSet); // 7.7 EU
+        addPacketOpcode(SM_PLAYER_COLLECTION_COMPLETE.class, 0x192, idSet); // 7.7 EU
+        addPacketOpcode(SM_PLAYER_COLLECTION_REGISTER.class, 0x193, idSet); // 7.7 EU
 		// --------------------UNKNOWN PACKETS-----------------------//
 		addPacketOpcode(SM_UNK_60.class, 0x60, idSet); // 7.5 EU
 		addPacketOpcode(SM_UNK_106.class, 0x106, idSet); // 7.5 EU
@@ -355,6 +368,7 @@ public class ServerPacketsOpcodes {
 		addPacketOpcode(SM_WORLD_PLAYTIME.class, 0x185, idSet); // 7.5 EU
 		addPacketOpcode(SM_PLAYER_FAME.class, 0x186, idSet); // 7.5 EU
 		addPacketOpcode(SM_RUNES.class, 0x188, idSet); // 7.5 EU TODO
+		addPacketOpcode(SM_RUNES_FUSION.class, 0x187, idSet); // 7.5 EU TODO
 		
 		// --------------------UNKNOWN PACKETS-----------------------//
 	}

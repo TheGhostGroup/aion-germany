@@ -46,6 +46,9 @@ import com.aionemu.gameserver.model.PlayerClass;
 import com.aionemu.gameserver.model.Race;
 import com.aionemu.gameserver.model.TribeClass;
 import com.aionemu.gameserver.model.account.Account;
+import com.aionemu.gameserver.model.account.AccountTransfo;
+import com.aionemu.gameserver.model.account.AccountTransformList;
+import com.aionemu.gameserver.model.account.TransformCollection;
 import com.aionemu.gameserver.model.actions.PlayerActions;
 import com.aionemu.gameserver.model.actions.PlayerMode;
 import com.aionemu.gameserver.model.cubics.PlayerMCList;
@@ -64,6 +67,8 @@ import com.aionemu.gameserver.model.gameobjects.SummonedObject;
 import com.aionemu.gameserver.model.gameobjects.Trap;
 import com.aionemu.gameserver.model.gameobjects.player.AbyssRank.AbyssRankUpdateType;
 import com.aionemu.gameserver.model.gameobjects.player.FriendList.Status;
+import com.aionemu.gameserver.model.gameobjects.player.achievement.PlayerAchievement;
+import com.aionemu.gameserver.model.gameobjects.player.collection.PlayerCollection;
 import com.aionemu.gameserver.model.gameobjects.player.emotion.EmotionList;
 import com.aionemu.gameserver.model.gameobjects.player.equipmentsetting.EquipmentSettingList;
 import com.aionemu.gameserver.model.gameobjects.player.f2p.F2p;
@@ -298,7 +303,7 @@ public class Player extends Creature {
 	private boolean isInLiveParty = false;
 	// private int linkedSkill;
 	private PlayerConquererProtectorData conquerorProtectorData;
-	private Map<Integer, PlayerFame> playerFame;
+	private Map<Integer, PlayerFame> playerFame = (Map<Integer, PlayerFame>)new FastMap<Integer, PlayerFame>();
     private int worldPlayTime;	
 
 	private PlayerBonusTime bonusTime;
@@ -316,13 +321,25 @@ public class Player extends Creature {
 	private int transformModelId;
 	private int transformItemId;
 	private int transformPanelId;
+	private int transformSkillId;
+	private boolean invisibleTransform = false;
+    private AccountTransformList transformList;
+    private int lastUsedTransformation;
+    private Map<Integer, TransformCollection> transformCollections = (Map<Integer, TransformCollection>)new FastMap<Integer, TransformCollection>();
+    private List<AccountTransfo> transformCreated = (List<AccountTransfo>)new FastList<AccountTransfo>();
 	private PlayerWardrobeList wardrobe;
 	private PlayerLunaShop lunaShop;
 	private PlayerSweep shugoSweep;
-	private boolean setMinionSpawned;
+	private LunaBuffBonus lunaBuffBonus;
+	private FastMap<Integer, Integer> minions_ = (FastMap<Integer, Integer>)new FastMap<Integer, Integer>();
+	private boolean setMinionSpawned = false;
+	private int minionEnergy;
 	private EquipmentSettingList equipmentSettingList;
 	private PlayerMCList mc;
-	private TransformationList transformationList;
+	private PlayerCollection playerCollection;
+    private Map<Integer, PlayerAchievement> playerAchievements = (Map<Integer, PlayerAchievement>)new FastMap<Integer, PlayerAchievement>();
+    private Map<Integer, PlayerAchievement> playerEventAchievements = (Map<Integer, PlayerAchievement>)new FastMap<Integer, PlayerAchievement>();
+	private Map<Integer, LumielTransform> playerLumiel = (Map<Integer, LumielTransform>)new FastMap<Integer, LumielTransform>();
 
 	/**
 	 * Player Skill Skin List
@@ -365,6 +382,11 @@ public class Player extends Creature {
 		this.requester = new ResponseRequester(this);
 		this.questStateList = new QuestStateList();
 		this.titleList = new TitleList();
+		this.invisibleTransform = false;
+        this.playerAchievements = (Map<Integer, PlayerAchievement>)new FastMap<Integer, PlayerAchievement>();
+        this.playerEventAchievements = (Map<Integer, PlayerAchievement>)new FastMap<Integer, PlayerAchievement>();		
+        this.transformCollections = (Map<Integer, TransformCollection>)new FastMap<Integer, TransformCollection>();
+        this.transformCreated = (List<AccountTransfo>)new FastList<AccountTransfo>();
 		this.portalCooldownList = new PortalCooldownList(this);
 		this.craftCooldownList = new CraftCooldownList(this);
 		this.houseObjectCooldownList = new HouseObjectCooldownList(this);
@@ -372,14 +394,15 @@ public class Player extends Creature {
 		this.minionList = new MinionList(this);
 		controller.setOwner(this);
 		moveController = new PlayerMoveController(this);
+		this.playerFame = (Map<Integer, PlayerFame>)new FastMap<Integer, PlayerFame>();
+		this.playerLumiel = (Map<Integer, LumielTransform>)new FastMap<Integer, LumielTransform>();
 		plCommonData.setBoundingRadius(new BoundRadius(0.5f, 0.5f, getPlayerAppearance().getHeight()));
 
 		setPlayerStatsTemplate(DataManager.PLAYER_STATS_DATA.getTemplate(this));
 		setGameStats(new PlayerGameStats(this));
 		setLifeStats(new PlayerLifeStats(this));
 		absStatsHolder = new AbsoluteStatOwner(this, 0);
-		this.setMinionSpawned = false;
-		this.transformationList = new TransformationList(this);
+		this.transformList = new AccountTransformList(this);
 	}
 
 	public boolean isInPlayerMode(PlayerMode mode) {
@@ -507,6 +530,23 @@ public class Player extends Creature {
 	public boolean isMinionSpawned() {
 		return setMinionSpawned;
 	}
+
+    public void setMinionTempList(int objId, int id) {
+        this.minions_.put(objId, id);
+    }
+    
+    public int getMinionTempList(int objId) {
+        if (objId == 0) {}
+        return minions_.get(objId);
+    }
+    
+    public int getMinionEnergy() {
+        return minionEnergy;
+    }
+    
+    public void setMinionEnergy(int energy) {
+        this.minionEnergy = energy;
+    }
 
 	public boolean isMagicalTypeClass() {
 		return playerCommonData.getPlayerClass() == PlayerClass.ARTIST || playerCommonData.getPlayerClass() == PlayerClass.BARD || playerCommonData.getPlayerClass() == PlayerClass.CLERIC || playerCommonData.getPlayerClass() == PlayerClass.SORCERER || playerCommonData.getPlayerClass() == PlayerClass.SPIRIT_MASTER || playerCommonData.getPlayerClass() == PlayerClass.RIDER;
@@ -1861,10 +1901,12 @@ public class Player extends Creature {
 		switch (getWorldId()) {
 			case 210050000:
 			case 220070000:
-			case 400010000:
-				// case 600030000: Tiamaranta
-			case 600050000:
-			case 600060000:
+            case 400070000:
+            case 800020000:
+            case 800030000:
+            case 800040000:
+            case 800050000:
+            case 800060000:
 				return true;
 			default:
 				return false;
@@ -2959,6 +3001,46 @@ public class Player extends Creature {
 		transformPanelId = id;
 	}
 
+    public int getTransformedSkillId() {
+        return transformSkillId;
+    }
+    
+    public void setTransformedSkillId(int id) {
+        this.transformSkillId = id;
+    }
+    
+    public boolean isInvisibleTransform() {
+        return invisibleTransform;
+    }
+    
+    public void setInvisibleTransform(boolean invisibleTransform) {
+        this.invisibleTransform = invisibleTransform;
+    }
+
+    public AccountTransformList getTransformList() {
+        return transformList;
+    }
+    
+    public int getLastUsedTransformation() {
+        return lastUsedTransformation;
+    }
+    
+    public void setLastUsedTransformation(int lastUsedTransformation) {
+        this.lastUsedTransformation = lastUsedTransformation;
+    }
+    
+    public Map<Integer, TransformCollection> getTransformCollections() {
+        return transformCollections;
+    }
+    
+    public List<AccountTransfo> getTransformCreated() {
+        return transformCreated;
+    }
+    
+    public void setTransformCreated(List<AccountTransfo> transformCreated) {
+        this.transformCreated = transformCreated;
+    }
+
 	/**
 	 * Luna System
 	 */
@@ -3026,6 +3108,14 @@ public class Player extends Creature {
 		return this.playerCommonData.getWardrobeSlot();
 	}
 
+    public LunaBuffBonus getLunaBuffBonus() {
+        return lunaBuffBonus;
+    }
+    
+    public void setLunaBuffBonus(LunaBuffBonus lunaBuffBonus) {
+        this.lunaBuffBonus = lunaBuffBonus;
+    }
+
 	/**
 	 * Tower of Challenge
 	 */
@@ -3036,14 +3126,6 @@ public class Player extends Creature {
     public int getFloor() {
         return this.getCommonData().getFloor();
     }
-
-	public int getMinionSkillPoints() {
-		return this.getCommonData().getMinionSkillPoints();
-	}
-	
-	public void setMinionSkillPoints(int minionSkillPoints) {
-		this.getCommonData().setMinionSkillPoints(minionSkillPoints);
-	}
 	
 	/**
 	 * Luna Dice Game
@@ -3136,11 +3218,23 @@ public class Player extends Creature {
 	}
 
 	/**
-	 * Transformation System
+	 * Achievement System
 	 */
-	public final TransformationList getTransformationList() {
-		return transformationList;
-	}
+    public Map<Integer, PlayerAchievement> getPlayerAchievements() {
+        return playerAchievements;
+    }
+
+    public void setPlayerAchievements(Map<Integer, PlayerAchievement> playerAchievements) {
+        this.playerAchievements = playerAchievements;
+    }
+
+    public Map<Integer, PlayerAchievement> getPlayerEventAchievements() {
+        return playerEventAchievements;
+    }
+
+    public void setPlayerEventAchievements(Map<Integer, PlayerAchievement> playerAchievements) {
+        this.playerEventAchievements = playerAchievements;
+    }
 
 	/**
 	 * Field Fame System
@@ -3153,11 +3247,36 @@ public class Player extends Creature {
         this.playerFame = playerFame;
     }
 
+	/**
+	 * World Playtime System
+	 */
     public int getWorldPlayTime() {
         return worldPlayTime;
     }
 
     public void setWorldPlayTime(int playTime) {
         this.worldPlayTime = playTime;
+    }
+
+	/**
+	 * Lumiel Transformation
+	 */
+    public Map<Integer, LumielTransform> getPlayerLumiel() {
+        return playerLumiel;
+    }
+
+    public void setPlayerLumiel(Map<Integer, LumielTransform> playerLumiel) {
+        this.playerLumiel = playerLumiel;
+    }
+
+	/**
+	 * Player Collection
+	 */
+    public PlayerCollection getPlayerCollection() {
+        return playerCollection;
+    }
+
+    public void setPlayerCollection(PlayerCollection playerCollection) {
+        this.playerCollection = playerCollection;
     }
 }

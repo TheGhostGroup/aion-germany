@@ -1109,6 +1109,10 @@
             <xs:enumeration value="IDCATACOMBS_RUDRA_HINT_02"/>
             <xs:enumeration value="ATREIA_GARDEN_PLANTS"/>
             <xs:enumeration value="ATREIA_GARDEN_BADLARVA"/>
+            <!-- New 7.8 -->
+            <xs:enumeration value="IDWATER_SLAYER"/>
+            <xs:enumeration value="IDWATER_TRAP"/>
+            <xs:enumeration value="IDWATER_ESSENCE"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<!-- Base types -->
@@ -1233,4 +1237,12 @@
     <xs:simpleType name="StringListType">
         <xs:list itemType="xs:string"/>
     </xs:simpleType>
+	<xs:simpleType name="CollectionType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="COMMON"/>
+			<xs:enumeration value="ANCIENT"/>
+			<xs:enumeration value="RELIC"/>
+			<xs:enumeration value="EVENT"/>
+		</xs:restriction>
+	</xs:simpleType>
 </xs:schema>
